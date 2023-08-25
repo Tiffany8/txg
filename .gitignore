@@ -15,6 +15,9 @@ build/
 
 .env
 
+# mongodb data from docker-compose
+data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

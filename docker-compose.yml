@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  db:
+    container_name: db
+    image: mongo
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
+
+  app:
+    container_name: app
+    build: . 
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
