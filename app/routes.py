@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 from app.api_schemas import BulkCreateSummary, WeatherDataParams, WeatherDataResults
@@ -11,7 +12,10 @@ router = APIRouter()
 @router.get("/weather-data", response_model=WeatherDataResults)
 async def read_weather_data(
     request: Request, params: WeatherDataParams = Depends(WeatherDataParams)
-):
+) -> WeatherDataResults:
+    """
+    Read weather data from the database based on the provided parameters.
+    """
     return await get_weather_data(request.app.database, params)
 
 
@@ -23,7 +27,7 @@ async def upload_weather_data_csv(request: Request, file: UploadFile = File(...)
     """
     if file is None:
         raise HTTPException(status_code=400, detail="No file provided")
-    if file.content_type != "text/csv":
+    if not file.filename.endswith(".csv"):
         raise HTTPException(
             status_code=400, detail="Invalid file format. Only CSV files are allowed."
         )

@@ -22,6 +22,8 @@ app = FastAPI()
 
 app.include_router(router)
 
+app.exception_handler(RequestValidationError)(validation_exception_handler)
+
 
 @app.on_event("startup")
 def startup_db_client():

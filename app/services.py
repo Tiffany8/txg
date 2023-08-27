@@ -32,11 +32,11 @@ async def process_and_save_weather_data_csv(
             try:
                 item = WeatherData(**row)
                 items.append(item.dict())
-            except (ValueError, ValidationError) as e:
-                error_msg = str(e)
-                errors.add(error_msg)
+            except ValidationError as e:
                 error_count += 1
-                logging.error(f"Data validation error: {error_msg}")
+                field = e.errors()[0]["loc"][0]
+                errors.add(f"Invalid {field}: {row.get(field)}")
+                logging.error(f"Data validation error: {str(e)}")
 
         if items:
             try:

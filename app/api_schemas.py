@@ -36,4 +36,4 @@ class WeatherDataResults(BaseModel):
 class BulkCreateSummary(BaseModel):
     success_count: Dict[str, int]
     error_count: int
-    errors: List[str]
+    errors: Set[str]
