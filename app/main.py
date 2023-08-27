@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from fastapi.exceptions import RequestValidationError
 
 import motor
 from fastapi import FastAPI, HTTPException, status
@@ -9,6 +10,7 @@ from pymongo.errors import (
     ConnectionFailure,
     ServerSelectionTimeoutError,
 )
+from app.exception_handlers import validation_exception_handler
 
 from app.routes import router
 
@@ -25,14 +27,38 @@ app.include_router(router)
 app.exception_handler(RequestValidationError)(validation_exception_handler)
 
 
+from dataclasses import dataclass
+
+
+@dataclass
+class MongodDbConfigs:
+    client: str
+    dbname: str
+
+
+def get_mongodb_configs():
+    if os.getenv("APP_ENV") == "test":
+        return MongodDbConfigs(
+            client=motor.motor_asyncio.AsyncIOMotorClient(os.getenv("TEST_MONGO_URL")),
+            dbname=os.getenv("TEST_MONGODB_NAME"),
+        )
+    else:
+        return MongodDbConfigs(
+            client=motor.motor_asyncio.AsyncIOMotorClient(
+                os.getenv("MONGO_URL", "mongodb://localhost:27017")
+            ),
+            dbname=os.getenv("MONGODB_NAME", "localdb"),
+        )
+
+
 @app.on_event("startup")
 def startup_db_client():
     try:
-        app.mongodb_client = motor.motor_asyncio.AsyncIOMotorClient(
-            os.getenv("MONGO_URL")
-        )
-        app.database = app.mongodb_client.app_database
-        print("Connected to the MongoDB database!")
+        configs = get_mongodb_configs()
+        mongo_client = configs.client
+        db_name = configs.dbname
+        app.database = mongo_client[db_name]
+        print(f"Connected to the MongoDB database: {db_name}")
     except (
         ConfigurationError,
         ServerSelectionTimeoutError,
@@ -44,7 +70,6 @@ def startup_db_client():
             detail="Internal Server Error. Please try again later.",
         )
     except Exception as e:
-        # fyi - raise with no argument preserves original traceback
         logging.error("An unexpected error occurred:", str(e))
         raise
 
