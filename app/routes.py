@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 from app.api_schemas import BulkCreateSummary, WeatherDataParams, WeatherDataResults

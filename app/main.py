@@ -1,17 +1,17 @@
 import logging
 import os
 import sys
-from fastapi.exceptions import RequestValidationError
 
 import motor
 from fastapi import FastAPI, HTTPException, status
+from fastapi.exceptions import RequestValidationError
 from pymongo.errors import (
     ConfigurationError,
     ConnectionFailure,
     ServerSelectionTimeoutError,
 )
-from app.exception_handlers import validation_exception_handler
 
+from app.exception_handlers import validation_exception_handler
 from app.routes import router
 
 logging.basicConfig(
