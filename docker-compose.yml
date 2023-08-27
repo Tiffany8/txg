@@ -9,15 +9,22 @@ services:
       - .env
     ports:
       - "27017:27017"
-    volumes:
-      - ./data/db:/data/db
 
-  app:
-    container_name: app
+  weather-service:
+    container_name: weather-service
     build: . 
     env_file:
       - .env
     ports:
       - "8000:8000"
     depends_on:
+      - db
+  
+  tests:
+    container_name: tests
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - weather-service
       - db
